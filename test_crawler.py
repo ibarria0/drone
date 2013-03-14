@@ -3,21 +3,21 @@ from bs4 import BeautifulSoup
 import urllib
 import urlparse
 import praw
-from drone import Crawler
+from Crawler import Crawler
 
 class TestCrawler(unittest.TestCase):
 
   def setUp(self):
-    self.base = 'www.microsoft.com'
+    self.base = 'localhost'
     self.crawler = Crawler(self.base) #everytime you run this test you waste some of microsoft's resources =)
   
   def test_convert_base(self):
     self.assertIsInstance(self.crawler.base,urlparse.ParseResult,"must return url objects")
 
   def test_clean(self):
-    if len(self.crawler.pending) > 0:
+      self.crawler.peding = [1]
       self.crawler.clean()
-      assertTrue(len(self.crawler.pending) == 0, "clean must delete pending emails")
+      self.assertTrue(len(self.crawler.pending) == 0, "clean must delete pending emails")
 
   def test_get_links_from_url(self):
     links = self.crawler.get_links_from_url(self.crawler.base)
@@ -27,8 +27,7 @@ class TestCrawler(unittest.TestCase):
     self.assertFalse(self.crawler.get_links_from_url(self.crawler.base), "only crawl unvisited urls")
 
   def test_crunch_links(self):
-    html = urllib.urlopen('http://www.google.com').read()
-    raw_links = BeautifulSoup(html).find_all('a')
+    raw_links = self.crawler.get_links_from_url(self.crawler.base) 
     self.assertIsInstance(self.crawler.crunch_links(raw_links),dict, "must return a dictionary")
     links = self.crawler.crunch_links(raw_links)
     self.assertTrue( links.has_key('emails'),'must have email key')
@@ -44,14 +43,26 @@ class TestCrawler(unittest.TestCase):
 
   def test_only_eat_new_urls(self):
     self.crawler.clean()
+    links = self.crawler.get_links_from_url(self.crawler.base)
+    self.crawler.eat_urls(self.crawler.crunch_links(links).get('pending'))
     old_total_urls = len(self.crawler.pending)
-    self.crawler.get_links_from_url(urlparse.urlparse('http://www.sameold.com'))
-    self.crawler.eat_urls([urlparse.urlparse('www.sameold.com')])
+    links = self.crawler.get_links_from_url(self.crawler.base)
+    self.crawler.eat_urls(self.crawler.crunch_links(links).get('pending'))
     self.assertTrue(len(self.crawler.pending) == old_total_urls, "only new links must be eaten")
 
   def test_detect_sqli(self):
-    self.assertTrue(self.crawler.detect_sqli(urlparse.urlparse("http://somesite.com/posts.php?id=1337")))
-    self.assertFalse(self.crawler.detect_sqli(urlparse.urlparse("http://somesite.com")))
+    self.assertTrue(self.crawler.detect_sqli(urlparse.urlparse("http://somesite.com/posts.php?id=1337")), "must detect simple parameter injection")
+    self.assertFalse(self.crawler.detect_sqli(urlparse.urlparse("http://somesite.com")), "must not show false positives")
+
+  def test_detect_juicy_files(self):
+    self.assertTrue(self.crawler.detect_juicy_files(urlparse.urlparse("http://somesite.com/passwords.pdf")), "must detect pdf files")
+    self.assertTrue(self.crawler.detect_juicy_files(urlparse.urlparse("http://somesite.com/passwords.xls")), "must detect xls files")
+    self.assertTrue(self.crawler.detect_juicy_files(urlparse.urlparse("http://somesite.com/passwords.doc")), "must detect doc files")
+    self.assertTrue(self.crawler.detect_juicy_files(urlparse.urlparse("http://somesite.com/passwords.txt")), "must detect txt files")
+    self.assertFalse(self.crawler.detect_sqli(urlparse.urlparse("http://somesite.com")), "must not show false positives")
+
+  def test_detect_form(self):
+    self.assertTrue(self.crawler.detect_form("<form action='bacon'>"))
 
 if __name__ == '__main__':
       unittest.main()
