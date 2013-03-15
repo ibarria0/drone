@@ -91,13 +91,16 @@ class Crawler:
   def match_url(self,url1,url2):
     return ((url1.netloc + url1.path) == (url2.netloc + url2.path))
 
+  def crawl_url(self,url):
+    new_raw_links = self.get_links_from_url(url)
+    new_crunched_links = self.crunch_links(new_raw_links)
+    self.eat_urls(new_crunched_links.get('pending'))
+
   def start(self):
     self.pending.append(self.base)
     while (len(self.pending) > 0):
       new_url =self.pending.pop()
-      new_raw_links = self.get_links_from_url(new_url)
-      new_crunched_links = self.crunch_links(new_raw_links)
-      self.eat_urls(new_crunched_links.get('pending'))
+      self.crawl_url(new_url)
 
   def clean(self):
     self.visited = []

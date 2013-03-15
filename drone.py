@@ -11,6 +11,6 @@ def parse_args():
   return validate_args(parser.parse_args())
 
 args = parse_args()
-c = Crawler("localhost")
+c = Crawler(args.base)
 c.start()
 c.status()
