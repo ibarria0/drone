@@ -10,6 +10,7 @@ Features
 * finds pdf|xls|doc|txt files
 * finds forms
 * skips urls with same base and params 
+* skips image files
 
 Usage
 -----------------------------
