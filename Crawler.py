@@ -7,7 +7,7 @@ from time import sleep
 from Form import Form
 
 class Crawler:
-  def __init__(self,base,proxy=False,proxy_port=False):
+  def __init__(self,base,proxy=False,proxy_port=False,robots=False):
     self.visited = []
     self.pending = [] 
     self.emails = []
@@ -16,6 +16,7 @@ class Crawler:
     self.juicy = []
     self.base = base
     self.convert_base()
+    self.robots = robots
     self.proxy = proxy
     self.proxy_port = proxy_port
     
@@ -115,6 +116,8 @@ class Crawler:
     self.pending.append(self.base)
     if self.proxy:
       self.check_proxy()
+    if self.robots:
+      self.pending.append(urlparse.urlparse(self.base.geturl() + "/robots"))
     while (len(self.pending) > 0):
       new_url =self.pending.pop()
       self.crawl_url(new_url)
