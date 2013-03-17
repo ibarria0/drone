@@ -34,6 +34,11 @@ class TestCrawler(unittest.TestCase):
     self.assertTrue( links.has_key('pending'),'must have email key')
     for link in links.get('pending'):
       self.assertIsInstance(link,urlparse.ParseResult,"must return url objects")
+  
+  def test_crunch_links_skip_images(self):
+    pending_urls = self.crawler.crunch_links(["image.jpg"]).get('pending')
+    self.assertTrue(len(pending_urls) == 0, "must skip images")
+
 
   def test_eat_urls(self):
     self.crawler.clean()
