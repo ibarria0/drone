@@ -74,7 +74,7 @@ class Crawler:
       return []
 
   def update_status(self):
-    sys.stdout.write("\rUrls Visited: %d | latest: %s " % (len(self.visited) , self.visited[-1]))
+    sys.stdout.write("\rUrls Visited: %d | latest: %s " % (len(self.visited) , self.visited[-1].geturl()))
     sys.stdout.flush()
 
   def crunch_links(self,links):
