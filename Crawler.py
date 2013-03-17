@@ -74,14 +74,15 @@ class Crawler:
       return []
 
   def update_status(self):
-    sys.stdout.write("\rUrls Visited: %d" % (len(self.visited)))
+    sys.stdout.write("\rUrls Visited: %d | latest: %s " % (len(self.visited) , self.visited[-1]))
     sys.stdout.flush()
 
   def crunch_links(self,links):
+    r_image = re.compile(r".*(jpg|png|gif|JPG|PNG|GIF)$")
     emails = []
     pending = []
     for link in links: 
-      if not link.startswith('java') and not link.startswith("#"):
+      if not link.startswith('java') and not link.startswith("#") and not (r_image.match(link)):
         if link.startswith('mailto'):
           emails.extend(link)
         elif not link.startswith('http'):
