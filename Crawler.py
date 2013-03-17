@@ -127,6 +127,9 @@ class Crawler:
       new_url =self.pending.pop()
       self.crawl_url(new_url)
       self.update_status()
+    sys.stdout.write('\r')
+    sys.stdout.flush()
+
 
   def clean(self):
     self.visited = []
