@@ -24,9 +24,11 @@ class Crawler:
     proxy = {}
     proxy['http'] = 'http://' + str(self.proxy) + ":" + str(self.proxy_port)
     html = urllib.urlopen('http://icanhazip.com',proxies=proxy).read()
-    print "Using IP: " + html
-    sleep(1)
-    
+    html_no_proxy = urllib.urlopen('http://icanhazip.com').read()
+    print "####Checking Proxy####"
+    print "Using IP: " + html.strip()
+    print "Original IP: " + html_no_proxy
+    sleep(3)
 
 
   def detect_sqli(self,url):
