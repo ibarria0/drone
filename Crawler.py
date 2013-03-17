@@ -5,6 +5,7 @@ import re
 import operator
 from time import sleep
 from Form import Form
+import sys
 
 class Crawler:
   def __init__(self,base,proxy=False,proxy_port=False,robots=False):
@@ -72,6 +73,10 @@ class Crawler:
     else:
       return []
 
+  def update_status(self):
+    sys.stdout.write("\rUrls Visited: %d" % (len(self.visited)))
+    sys.stdout.flush()
+
   def crunch_links(self,links):
     emails = []
     pending = []
@@ -121,6 +126,7 @@ class Crawler:
     while (len(self.pending) > 0):
       new_url =self.pending.pop()
       self.crawl_url(new_url)
+      self.update_status()
 
   def clean(self):
     self.visited = []
