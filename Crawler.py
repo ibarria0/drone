@@ -1,14 +1,13 @@
-from bs4 import BeautifulSoup 
 import urllib
 from google import search
 import urlparse
 import re
 import operator
+from time import sleep
 from Form import Form
 
-
 class Crawler:
-  def __init__(self,base):
+  def __init__(self,base,proxy=False,proxy_port=False):
     self.visited = []
     self.pending = [] 
     self.emails = []
@@ -17,7 +16,19 @@ class Crawler:
     self.juicy = []
     self.base = base
     self.convert_base()
+    self.proxy = proxy
+    self.proxy_port = proxy_port
     
+
+  def check_proxy(self):
+    proxy = {}
+    proxy['http'] = 'http://' + str(self.proxy) + ":" + str(self.proxy_port)
+    html = urllib.urlopen('http://icanhazip.com',proxies=proxy).read()
+    print "Using IP: " + html
+    sleep(1)
+    
+
+
   def detect_sqli(self,url):
     if(re.search('.*\?.*=.*',url.geturl())):
       self.sqli.append(url)
@@ -46,9 +57,11 @@ class Crawler:
       self.base = "http://" + self.base
     self.base = urlparse.urlparse(self.base)
 
-  def get_links_from_url(self, url):
+  def get_links_from_url(self, url, proxy={}):
+    if self.proxy:
+      proxy['http'] = 'http://' + str(self.proxy) + ":" + str(self.proxy_port)
     if url not in self.visited:
-      html = urllib.urlopen(url.geturl()).read()
+      html = urllib.urlopen(url.geturl(),proxies=proxy).read()
       self.visited.append(url)
       self.detect_form(html)
       raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
@@ -98,6 +111,8 @@ class Crawler:
 
   def start(self):
     self.pending.append(self.base)
+    if self.proxy:
+      self.check_proxy()
     while (len(self.pending) > 0):
       new_url =self.pending.pop()
       self.crawl_url(new_url)
