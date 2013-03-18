@@ -1,22 +1,29 @@
 import threading
+from time import sleep
 import urllib
 
 class ScrapeThread(threading.Thread):
-  def __init__(self, queue, out_queue, bucket, proxy, proxy_port):
+  def __init__(self, queue, out_queue, bucket, proxy, proxy_port, worker):
     threading.Thread.__init__(self)
     self.proxy = proxy
     self.proxy_port = proxy_port
     self.queue = queue
     self.bucket = bucket
     self.out_queue = out_queue
+    self.worker = worker
 
   def run(self):
     while True:
-      url = self.queue.get()
-      self.read_url(url)
-      self.queue.task_done()
       if self.queue.empty():
-        return True
+        if self.worker.isAlive():
+          continue
+        else:
+          return True
+      else:
+        url = self.queue.get()
+        self.queue.task_done()
+        self.read_url(url)
+
 
   def read_url(self,url):
     if self.proxy:

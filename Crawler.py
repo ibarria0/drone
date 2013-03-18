@@ -48,28 +48,31 @@ class Crawler:
     self.base = urlparse.urlparse(self.base)
 
   def update_status(self):
-    sys.stdout.write("\rUrls Visited: %d" % (self.visited_queue.qsize()))
+    sys.stdout.write("\rVisited: %d | Pending: %d" % (self.visited_queue.qsize(), self.url_queue.qsize()))
     sys.stdout.flush()
 
   def spawn_threads(self):
+
     worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue)
     worker.setDaemon(True)
     worker.start()
-    
+
+
     scrapers = []
     for i in range(5):
-      t = ScrapeThread(self.url_queue, self.html_queue,self.visited_queue,self.proxy,self.proxy_port)
+      t = ScrapeThread(self.url_queue, self.html_queue,self.visited_queue,self.proxy,self.proxy_port,worker)
       t.setDaemon(True)
       t.start()
       scrapers.append(t)
 
+    while worker.isAlive():
+      self.update_status()
+      sleep(0.1)
 
-    self.html_queue.join()
-    self.url_queue.join()
+    for thread in scrapers:
+      thread.join()
 
-    for i in scrapers:
-      i.join()
-    worker.join()
+
 
   def start(self):
     self.url_queue.put(self.base)
@@ -78,6 +81,9 @@ class Crawler:
     if self.robots:
       self.url_queue.put(urlparse.urlparse(self.base.geturl() + "/robots"))
     self.spawn_threads()
+    sys.stdout.write("\r")
+    sys.stdout.flush()
+
     self.status()
 
   def clean(self):

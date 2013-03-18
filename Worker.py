@@ -2,6 +2,7 @@ import threading
 import re
 import urllib
 import urlparse
+from time import sleep
 
 class WorkThread(threading.Thread):
   def __init__(self, queue, out_queue, base, sqli_queue):
@@ -18,13 +19,15 @@ class WorkThread(threading.Thread):
 
   def run(self):
     while True:
-      html = self.queue.get() #get raw html
-      urls = self.crunch_links(self.extract_links(html))
-      self.eat_urls(urls)
-      #signals to queue job is done
-      self.queue.task_done()
       if self.queue.empty():
-        return True
+        self.out_queue.join()
+        if self.queue.empty():
+          return True
+      else:
+        html = self.queue.get() #get raw html
+        urls = self.crunch_links(self.extract_links(html))
+        self.eat_urls(urls)
+        self.queue.task_done()
 
   def extract_links(self,html):
     raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
