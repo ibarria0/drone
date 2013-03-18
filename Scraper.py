@@ -21,8 +21,8 @@ class ScrapeThread(threading.Thread):
           return True
       else:
         url = self.queue.get()
-        self.queue.task_done()
         self.read_url(url)
+        self.queue.task_done()
 
 
   def read_url(self,url):

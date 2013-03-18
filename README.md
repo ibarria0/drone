@@ -7,10 +7,9 @@ Features
 ----------------------------
 * use robots.txt
 * HTTP proxy support
-* finds pdf|xls|doc|txt files
-* finds forms
 * skips urls with same base and params 
 * skips image files
+* threaded
 
 Usage
 -----------------------------
