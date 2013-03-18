@@ -16,4 +16,3 @@ def parse_args():
 args = parse_args()
 c = Crawler(args.base,args.proxy,args.proxy_port,args.robots)
 c.start()
-c.status()
