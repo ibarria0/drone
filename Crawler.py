@@ -69,6 +69,8 @@ class Crawler:
       self.update_status()
       sleep(0.1)
 
+    sys.stdout.write("\rKillin Scrapers..........")
+    sys.stdout.flush()
     for thread in scrapers:
       thread.join()
 

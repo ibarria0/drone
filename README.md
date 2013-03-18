@@ -11,6 +11,10 @@ Features
 * skips image files
 * threaded
 
+To Do
+----------------------------
+* fix threading (when to kill what)
+
 Usage
 -----------------------------
     python drone.py [-h] [--proxy PROXY] [--proxy_port PROXY_PORT] [--robots] base_url
