@@ -1,4 +1,5 @@
 import threading
+import Queue
 from time import sleep
 import urllib
 
@@ -20,7 +21,11 @@ class ScrapeThread(threading.Thread):
         else:
           return True
       else:
-        url = self.queue.get()
+        try:
+          url = self.queue.get_nowait()
+        except Queue.Empty:
+          sleep(0.2)
+          continue
         self.read_url(url)
         self.queue.task_done()
 

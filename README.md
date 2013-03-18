@@ -13,7 +13,8 @@ Features
 
 To Do
 ----------------------------
-* fix threading (when to kill what)
+* more detection
+* use BeautifulSoup
 
 Usage
 -----------------------------

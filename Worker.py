@@ -20,6 +20,7 @@ class WorkThread(threading.Thread):
   def run(self):
     while True:
       if self.queue.empty():
+        sleep(0.1)
         self.out_queue.join()
         if self.queue.empty():
           return True

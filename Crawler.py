@@ -83,7 +83,7 @@ class Crawler:
     if self.robots:
       self.url_queue.put(urlparse.urlparse(self.base.geturl() + "/robots"))
     self.spawn_threads()
-    sys.stdout.write("\r")
+    sys.stdout.write("\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r")
     sys.stdout.flush()
 
     self.status()
@@ -94,9 +94,9 @@ class Crawler:
     self.emails = []
 
   def status(self):
-    print "################"
-    print "##Drone Status##"
-    print "################"
+    print "##################################"
+    print "###########Drone Status###########"
+    print "##################################"
     print "urls visited: " + str(self.visited_queue.qsize())
     print "possible sqli found: " + str(self.sqli_queue.qsize())
     print
