@@ -26,9 +26,12 @@ class WorkThread(threading.Thread):
           return True
       else:
         html = self.queue.get() #get raw html
-        urls = self.crunch_links(self.extract_links(html))
-        self.eat_urls(urls)
+        self.work(html) #do work
         self.queue.task_done()
+
+  def work(self,html):
+      urls = self.crunch_links(self.extract_links(html))
+      self.eat_urls(urls)
 
   def extract_links(self,html):
     raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
