@@ -18,6 +18,7 @@ class WorkThread(threading.Thread):
     self.base = base
 
     self.seen = [] 
+    self.seen_forms = [] 
     self.sqli = []
     self.juicy = []
 
@@ -41,16 +42,15 @@ class WorkThread(threading.Thread):
   def extract_links(self,html):
   # raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
     raw_links = BeautifulSoup(html, 'html.parser' ,parse_only=SoupStrainer("a"))
-    return [link.get('href') for link in raw_links]
+    return filter(None, [link.get('href') for link in raw_links]) # collect href text and filter non objects
 
   def extract_forms(self,html):
     raw_forms = BeautifulSoup(html, 'html.parser' ,parse_only=SoupStrainer("form"))
-    return raw_forms
+    return filter(None, raw_forms)
 
   def crunch_links(self,links):
     r_image = re.compile(r".*(jpg|png|gif|JPG|PNG|GIF)$")
     pending = []
-    links = filter(None, links) # remove empty objects
     for link in links:
       if not (link.startswith('java') or link.startswith('mailto') or link.startswith("#") or (r_image.match(link))): #if its a url link
         if link.startswith("http"): 
@@ -71,19 +71,28 @@ class WorkThread(threading.Thread):
         if self.is_a_new_url(url):
           self.out_queue.put(url)
           self.detect_sqli(url)
+          self.seen.append(url)
 
   def eat_forms(self,forms):
     for form in forms:
-      #do some processing
       form = Form(form)
-      self.forms_queue.put(form)
+      if self.is_a_new_form(form):
+        #do some processing
+        self.forms_queue.put(form)
+        self.seen_forms.append(form)
 
   def is_a_new_url(self,url):
     for seen_url in self.seen:
       if self.match_params(seen_url,url) and self.match_url(seen_url,url):
         return False 
-    self.seen.append(url)
     return True
+
+  def is_a_new_form(self,form):
+    for seen_form in self.seen_forms:
+      if seen_form == form:
+        return False
+    return True
+      
 
   def match_params(self,url1,url2):
     return set(urlparse.parse_qs(url1.query).keys()) == set(urlparse.parse_qs(url2.query).keys())
