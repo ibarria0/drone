@@ -112,6 +112,7 @@ class Crawler:
       for i in self.juicy:
         print "juicy: " + i.geturl()
     print
+    print "### Forms Collected ###"
     while not self.forms_queue.empty():
       print self.forms_queue.get()
       self.forms_queue.task_done()
