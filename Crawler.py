@@ -16,13 +16,6 @@ class Crawler:
     self.sqli_queue = Queue.Queue()
     self.visited_queue = Queue.Queue()
     self.forms_queue = Queue.Queue()
-    self.pending = [] 
-    self.visited = [] 
-
-    self.emails = []
-    self.sqli = []
-    self.forms = []
-    self.juicy = []
     self.base = base
     self.convert_base()
     self.robots = robots
@@ -37,7 +30,6 @@ class Crawler:
     html_no_proxy = urllib.urlopen('http://icanhazip.com').read()
     print "####Checking Proxy####"
     print "Using IP: " + html.strip()
-
     print "Original IP: " + html_no_proxy
     sleep(3)
 
@@ -88,11 +80,6 @@ class Crawler:
 
     self.status()
 
-  def clean(self):
-    self.visited = []
-    self.pending = [] 
-    self.emails = []
-
   def status(self):
     print "##################################"
     print "###########Drone Status###########"
@@ -105,11 +92,6 @@ class Crawler:
       i = self.sqli_queue.get()
       print "get: " + i.geturl()
       self.sqli_queue.task_done()
-    print
-    if len(self.juicy) > 0:
-      print "##Possible Juicy Files##"
-      for i in self.juicy:
-        print "juicy: " + i.geturl()
     print
     print "###Forms Collected###"
     while not self.forms_queue.empty():

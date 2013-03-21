@@ -16,6 +16,7 @@ class ScrapeThread(threading.Thread):
   def run(self):
     while True:
       if self.queue.empty():
+        sleep(0.2)
         if self.worker.isAlive():
           continue
         else:
@@ -29,11 +30,9 @@ class ScrapeThread(threading.Thread):
         self.read_url(url)
         self.queue.task_done()
 
-  def read_url(self,url):
+  def read_url(self,url,proxy={}):
     if self.proxy:
       proxy['http'] = 'http://' + str(self.proxy) + ":" + str(self.proxy_port)
-    else:
-      proxy = {}
     html = urllib.urlopen(url.geturl(),proxies=proxy).read()
     self.out_queue.put(html)
     self.bucket.put(url)
