@@ -29,7 +29,6 @@ class ScrapeThread(threading.Thread):
         self.read_url(url)
         self.queue.task_done()
 
-
   def read_url(self,url):
     if self.proxy:
       proxy['http'] = 'http://' + str(self.proxy) + ":" + str(self.proxy_port)

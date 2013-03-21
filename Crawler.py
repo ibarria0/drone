@@ -1,7 +1,6 @@
 import logging
 import urllib
 import Queue
-from google import search
 import urlparse
 import re
 import operator
