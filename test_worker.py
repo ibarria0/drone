@@ -13,13 +13,18 @@ class TestWorker(unittest.TestCase):
     self.html_queue = Queue.Queue()
     self.sqli_queue = Queue.Queue()
     self.visited_queue = Queue.Queue()
-    self.worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue)
-    self.html = "<p>This is not a link</p><a href='vacaloca'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><div id='href'>www.thisisalinknotinalink.com</div><a href='/vacaloca?fail=1&cat=2'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><a href='http://localhost/vacaloca'>Moo</a><a href='/vacaloca'>Moo</a><h2>And also not this</h2><span>seriously, move on</span><a href='javascript:sillyjs()'>Click Me</a><a href='#datdiv'>DatDiv</a>"
+    self.forms_queue = Queue.Queue()
+    self.worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue, self.forms_queue)
+    self.html = "<form action='moo'><input type='text' name='input_box'></form><p>This is not a link</p><a href='vacaloca'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><div id='href'>www.thisisalinknotinalink.com</div><a href='/vacaloca?fail=1&cat=2'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><a href='http://localhost/vacaloca'>Moo</a><a href='/vacaloca'>Moo</a><h2>And also not this</h2><span>seriously, move on</span><a href='javascript:sillyjs()'>Click Me</a><a href='#datdiv'>DatDiv</a>"
 
   def test_extract_links(self):
     links = self.worker.extract_links(self.html)
     self.assertTrue(len(links) == 8,"must extract all <a> and skip non <a> ") #extract only and all links
     self.assertTrue(links[0] == 'vacaloca', "must return href string") #return only href part
+
+  def test_extract_forms(self):
+    forms = self.worker.extract_forms(self.html)
+    self.assertTrue(len(forms) == 1,"must extract all forms")
 
   def test_crunch_links(self):
     self.assertTrue(len(self.worker.crunch_links(["mailto:moo@moo.com"])) == 0, "must skip email links" )
@@ -69,6 +74,11 @@ class TestWorker(unittest.TestCase):
     crunched_links = self.worker.crunch_links(self.worker.extract_links("<a href='/onelink'>one love</a>"))
     self.worker.eat_urls(crunched_links)
     self.assertTrue(self.url_queue.qsize() == 1 , "must add new links to url_queue")
+
+  def test_eat_forms(self):
+    self.worker.forms = []
+    self.worker.eat_forms(self.worker.extract_forms("<form action='moo.php'><input type='text' name='username' /></form>"))
+    self.assertTrue(self.forms_queue.qsize() == 1, "must eat forms")
 
   def test_work(self):
     self.worker.seen = [] # clear seen urls

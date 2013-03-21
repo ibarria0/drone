@@ -16,6 +16,7 @@ class Crawler:
     self.html_queue = Queue.Queue()
     self.sqli_queue = Queue.Queue()
     self.visited_queue = Queue.Queue()
+    self.forms_queue = Queue.Queue()
     self.pending = [] 
     self.visited = [] 
 
@@ -53,7 +54,7 @@ class Crawler:
 
   def spawn_threads(self):
 
-    worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue)
+    worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue, self.forms_queue)
     worker.setDaemon(True)
     worker.start()
 
@@ -111,11 +112,11 @@ class Crawler:
       for i in self.juicy:
         print "juicy: " + i.geturl()
     print
-    if len(self.forms) > 0:
-      print "##Forms Detected##"
-      for i in self.forms:
-        print "forms: " + str(i)
+    while not self.forms_queue.empty():
+      print self.forms_queue.get()
+      self.forms_queue.task_done()
     
+    print
     while not self.visited_queue.empty():
       print self.visited_queue.get().geturl()
       self.visited_queue.task_done()
