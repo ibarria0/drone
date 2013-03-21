@@ -14,7 +14,6 @@ Features
 To Do
 ----------------------------
 * more detection
-* use BeautifulSoup
 
 Usage
 -----------------------------
