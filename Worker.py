@@ -1,4 +1,6 @@
 import threading
+from bs4 import BeautifulSoup
+from bs4 import SoupStrainer
 import re
 import urllib
 import urlparse
@@ -34,16 +36,22 @@ class WorkThread(threading.Thread):
       self.eat_urls(urls)
 
   def extract_links(self,html):
-    raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
-    return raw_links
+  # raw_links = re.findall(r'href=[\'"]?([^\'" >]+)', html)
+    raw_links = BeautifulSoup(html, 'html.parser' ,parse_only=SoupStrainer("a"))
+    return [link.get('href') for link in raw_links]
 
   def crunch_links(self,links):
     r_image = re.compile(r".*(jpg|png|gif|JPG|PNG|GIF)$")
     pending = []
     for link in links:
-      if not (link.startswith('java') or link.startswith('mailto') or link.startswith("#") or link.startswith("http") or (r_image.match(link))):
+      if not (link.startswith('java') or link.startswith('mailto') or link.startswith("#") or (r_image.match(link))):
+        if link.startswith("http"):
+          if self.match_base(urlparse.urlparse(link)):
+            pending.append(urlparse.urlparse(link))
+            continue
+          else:
+            continue
         if not link.startswith('/'):
-
           pending.append(urlparse.urlparse(self.base.geturl() + "/" + str(link)))
         else:
           pending.append(urlparse.urlparse(self.base.geturl() + str(link)))
@@ -68,6 +76,10 @@ class WorkThread(threading.Thread):
 
   def match_url(self,url1,url2):
     return ((url1.netloc + url1.path) == (url2.netloc + url2.path))
+
+  def match_base(self,url1):
+    url2 = self.base
+    return ((url1.netloc) == (url2.netloc + url2.path) or (url1.path) == (url2.netloc + url2.path))
 
   def detect_sqli(self,url):
     if(re.search('.*\?.*=.*',url.geturl())):

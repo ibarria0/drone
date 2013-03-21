@@ -1,3 +1,4 @@
+import logging
 import urllib
 import Queue
 from google import search
@@ -5,7 +6,6 @@ import urlparse
 import re
 import operator
 from time import sleep
-from Form import Form
 from Scraper import ScrapeThread
 from Worker import WorkThread
 import sys
@@ -100,10 +100,10 @@ class Crawler:
     print "urls visited: " + str(self.visited_queue.qsize())
     print "possible sqli found: " + str(self.sqli_queue.qsize())
     print
-    print "##Possible SQLi##"
+    print "##URLs with GET Params##"
     while not self.sqli_queue.empty():
       i = self.sqli_queue.get()
-      print "sqli: " + i.geturl()
+      print "get: " + i.geturl()
       self.sqli_queue.task_done()
     print
     if len(self.juicy) > 0:
@@ -116,6 +116,6 @@ class Crawler:
       for i in self.forms:
         print "forms: " + str(i)
     
-
-
-
+    while not self.visited_queue.empty():
+      print self.visited_queue.get().geturl()
+      self.visited_queue.task_done()

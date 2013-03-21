@@ -1,0 +1,36 @@
+import unittest
+from bs4 import BeautifulSoup
+import urllib
+import urlparse
+import Queue
+from Worker import WorkThread
+
+
+class TestWorker(unittest.TestCase):
+
+  def setUp(self):
+    self.base = urlparse.urlparse('localhost')
+    self.url_queue = Queue.Queue()
+    self.html_queue = Queue.Queue()
+    self.sqli_queue = Queue.Queue()
+    self.visited_queue = Queue.Queue()
+    self.worker = WorkThread(self.html_queue, self.url_queue,self.base, self.sqli_queue)
+    self.html = "<p>This is not a link</p><a href='vacaloca'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><div id='href'>www.thisisalinknotinalink.com</div><a href='/vacaloca?fail=1&cat=2'>Moo</a><a href='/vacaloca?fail=1'>Moo</a><a href='http://localhost/vacaloca'>Moo</a><a href='/vacaloca'>Moo</a><h2>And also not this</h2><span>seriously, move on</span><a href='javascript:sillyjs()'>Click Me</a><a href='#datdiv'>DatDiv</a>"
+
+  
+  def test_extract_links(self):
+    links = self.worker.extract_links(self.html)
+    self.assertTrue(len(links) == 8,"must extract all <a> and skip non <a> ") #extract only and all links
+    self.assertTrue(links[0] == 'vacaloca', "must return href string") #return only href part
+
+  def test_crunch_links(self):
+    crunched_links = self.worker.crunch_links(self.worker.extract_links(self.html))
+    print len(crunched_links)
+    self.assertTrue(len(crunched_links))
+    
+
+
+
+
+if __name__ == '__main__':
+      unittest.main()
